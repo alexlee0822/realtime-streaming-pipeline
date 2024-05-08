@@ -1,0 +1,217 @@
+services:
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: rsp-kafka
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      KAFKA_CFG_NODE_ID: 0
+      KAFKA_CFG_PROCESS_ROLES: controller,broker
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_CFG_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    volumes:
+      - kafka_data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+
+  kafka-init:
+    image: bitnami/kafka:3.7
+    container_name: rsp-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        set -e
+        kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic clickstream.raw --partitions 3 --replication-factor 1
+        kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic clickstream.cleaned --partitions 3 --replication-factor 1
+        kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic clickstream.curated --partitions 3 --replication-factor 1
+        kafka-topics.sh --bootstrap-server kafka:9092 --create --if-not-exists --topic clickstream.dlq --partitions 1 --replication-factor 1
+        echo "Topics ready"
+    restart: "no"
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    container_name: rsp-kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: rsp-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: stream
+      POSTGRES_PASSWORD: stream
+      POSTGRES_DB: clickstream
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stream -d clickstream"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  spark-master:
+    build:
+      context: ./spark
+    container_name: rsp-spark-master
+    environment:
+      SPARK_MODE: master
+      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
+      SPARK_RPC_ENCRYPTION_ENABLED: "no"
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
+      SPARK_SSL_ENABLED: "no"
+    ports:
+      - "8081:8080"
+      - "7077:7077"
+    volumes:
+      - ./spark/jobs:/opt/spark-jobs
+      - delta_warehouse:/opt/delta
+      - spark_checkpoints:/opt/checkpoints
+
+  spark-worker:
+    build:
+      context: ./spark
+    container_name: rsp-spark-worker
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_WORKER_MEMORY: 2G
+      SPARK_WORKER_CORES: 2
+      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
+      SPARK_RPC_ENCRYPTION_ENABLED: "no"
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
+      SPARK_SSL_ENABLED: "no"
+    volumes:
+      - ./spark/jobs:/opt/spark-jobs
+      - delta_warehouse:/opt/delta
+      - spark_checkpoints:/opt/checkpoints
+
+  spark-clean:
+    build:
+      context: ./spark
+    container_name: rsp-spark-clean
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+      spark-master:
+        condition: service_started
+    environment:
+      SPARK_MODE: master
+      KAFKA_BOOTSTRAP: kafka:9092
+      DELTA_PATH: /opt/delta
+      CHECKPOINT_PATH: /opt/checkpoints
+    entrypoint: ["/opt/bitnami/spark/bin/spark-submit"]
+    command:
+      - --master
+      - local[2]
+      - --packages
+      - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,io.delta:delta-spark_2.12:3.2.0
+      - --conf
+      - spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension
+      - --conf
+      - spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog
+      - /opt/spark-jobs/clean_stream.py
+    volumes:
+      - ./spark/jobs:/opt/spark-jobs
+      - delta_warehouse:/opt/delta
+      - spark_checkpoints:/opt/checkpoints
+    restart: unless-stopped
+
+  spark-curate:
+    build:
+      context: ./spark
+    container_name: rsp-spark-curate
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      spark-master:
+        condition: service_started
+    environment:
+      SPARK_MODE: master
+      KAFKA_BOOTSTRAP: kafka:9092
+      DELTA_PATH: /opt/delta
+      CHECKPOINT_PATH: /opt/checkpoints
+      POSTGRES_URL: jdbc:postgresql://postgres:5432/clickstream
+      POSTGRES_USER: stream
+      POSTGRES_PASSWORD: stream
+    entrypoint: ["/opt/bitnami/spark/bin/spark-submit"]
+    command:
+      - --master
+      - local[2]
+      - --packages
+      - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1,io.delta:delta-spark_2.12:3.2.0,org.postgresql:postgresql:42.7.3
+      - --conf
+      - spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension
+      - --conf
+      - spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog
+      - /opt/spark-jobs/curate_stream.py
+    volumes:
+      - ./spark/jobs:/opt/spark-jobs
+      - delta_warehouse:/opt/delta
+      - spark_checkpoints:/opt/checkpoints
+    restart: unless-stopped
+
+  producer:
+    build:
+      context: ./producer
+    container_name: rsp-producer
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+    environment:
+      KAFKA_BOOTSTRAP: kafka:9092
+      TOPIC: clickstream.raw
+      EVENTS_PER_SEC: "25"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: rsp-grafana
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/clickstream.json
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+
+volumes:
+  kafka_data:
+  postgres_data:
+  delta_warehouse:
+  spark_checkpoints:
+  grafana_data:
