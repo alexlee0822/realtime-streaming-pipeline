@@ -4,3 +4,4 @@
 - 2024-05-08: chore: add docker compose skeleton for local stack
 - 2024-05-17: feat(kafka): define raw cleaned curated and dlq topics
 - 2024-05-21: feat(producer): bootstrap clickstream producer service
+- 2024-05-23: feat(producer): add session reuse and light data corruption
