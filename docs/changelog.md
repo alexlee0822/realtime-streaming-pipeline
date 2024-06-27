@@ -8,3 +8,4 @@
 - 2024-06-05: feat(postgres): add curated schema for downstream analytics
 - 2024-06-19: feat(spark): add spark image for streaming jobs
 - 2024-06-20: feat(spark): implement raw to cleaned streaming job
+- 2024-06-27: feat(spark): route invalid events to dlq topic
