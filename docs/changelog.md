@@ -9,3 +9,4 @@
 - 2024-06-19: feat(spark): add spark image for streaming jobs
 - 2024-06-20: feat(spark): implement raw to cleaned streaming job
 - 2024-06-27: feat(spark): route invalid events to dlq topic
+- 2024-07-02: feat(spark): write cleaned events to delta silver
