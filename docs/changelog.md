@@ -11,3 +11,4 @@
 - 2024-06-27: feat(spark): route invalid events to dlq topic
 - 2024-07-02: feat(spark): write cleaned events to delta silver
 - 2024-07-09: feat(spark): add curated aggregations streaming job
+- 2024-07-11: feat(spark): land funnel metrics in postgres and delta gold
