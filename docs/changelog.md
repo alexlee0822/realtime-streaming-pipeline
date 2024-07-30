@@ -13,3 +13,4 @@
 - 2024-07-09: feat(spark): add curated aggregations streaming job
 - 2024-07-11: feat(spark): land funnel metrics in postgres and delta gold
 - 2024-07-17: feat(spark): add device and country window metrics
+- 2024-07-30: feat(grafana): provision postgres datasource
