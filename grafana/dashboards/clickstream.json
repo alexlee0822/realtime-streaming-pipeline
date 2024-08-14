@@ -1,0 +1,251 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 0 },
+      "id": 1,
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT event_ts AS time, event_type AS metric, 1 AS value FROM curated.events_cleaned WHERE $__timeFilter(event_ts) ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Event volume by type",
+      "type": "timeseries",
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COALESCE(SUM(amount),0) AS revenue FROM curated.events_cleaned WHERE event_type = 'purchase' AND $__timeFilter(event_ts)",
+          "refId": "A"
+        }
+      ],
+      "title": "Revenue",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": { "unit": "short" },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) AS purchases FROM curated.events_cleaned WHERE event_type = 'purchase' AND $__timeFilter(event_ts)",
+          "refId": "A"
+        }
+      ],
+      "title": "Purchases",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": { "unit": "short" },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 4 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT session_id) AS sessions FROM curated.events_cleaned WHERE $__timeFilter(event_ts)",
+          "refId": "A"
+        }
+      ],
+      "title": "Sessions",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": { "unit": "percentunit", "min": 0, "max": 1 },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 4 },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }
+      },
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT CASE WHEN COUNT(*) FILTER (WHERE event_type='page_view') = 0 THEN 0 ELSE COUNT(*) FILTER (WHERE event_type='purchase')::float / COUNT(*) FILTER (WHERE event_type='page_view') END AS cvr FROM curated.events_cleaned WHERE $__timeFilter(event_ts)",
+          "refId": "A"
+        }
+      ],
+      "title": "Purchase / view CVR",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "blue", "value": null },
+              { "color": "green", "value": 50 },
+              { "color": "orange", "value": 200 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 6,
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT page, COUNT(*) AS events, COUNT(DISTINCT user_id) AS users FROM curated.events_cleaned WHERE $__timeFilter(event_ts) GROUP BY page ORDER BY events DESC LIMIT 10",
+          "refId": "A"
+        }
+      ],
+      "title": "Top pages",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": { "unit": "short" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 7,
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT window_start AS time, page_views, clicks, add_to_carts, purchases, revenue FROM curated.funnel_1m WHERE $__timeFilter(window_start) ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Funnel (1m windows)",
+      "type": "timeseries",
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      }
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": { "unit": "short" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 8,
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT device, country, SUM(event_count) AS events, SUM(purchases) AS purchases, SUM(revenue) AS revenue FROM curated.device_country_1m WHERE $__timeFilter(window_start) GROUP BY device, country ORDER BY events DESC LIMIT 20",
+          "refId": "A"
+        }
+      ],
+      "title": "Device × country",
+      "type": "table"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "clickstream-pg" },
+      "fieldConfig": {
+        "defaults": { "unit": "ms" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "id": 9,
+      "targets": [
+        {
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT window_start AS time, page AS metric, avg_latency_ms AS value FROM curated.page_metrics_1m WHERE $__timeFilter(window_start) AND event_type = 'page_view'",
+          "refId": "A"
+        }
+      ],
+      "title": "Avg page latency (ms)",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": ["clickstream", "kafka", "spark"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "timezone": "browser",
+  "title": "Realtime Clickstream",
+  "uid": "clickstream-realtime",
+  "version": 1
+}
