@@ -16,3 +16,4 @@
 - 2024-07-30: feat(grafana): provision postgres datasource
 - 2024-08-14: feat(grafana): add realtime clickstream dashboard
 - 2024-08-20: chore: add start and stop helper scripts
+- 2024-08-27: docs: describe architecture and demo path
