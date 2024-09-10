@@ -17,3 +17,4 @@
 - 2024-08-14: feat(grafana): add realtime clickstream dashboard
 - 2024-08-20: chore: add start and stop helper scripts
 - 2024-08-27: docs: describe architecture and demo path
+- 2024-09-10: fix(postgres): relax keys on streaming metric tables
