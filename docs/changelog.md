@@ -19,3 +19,4 @@
 - 2024-08-27: docs: describe architecture and demo path
 - 2024-09-10: fix(postgres): relax keys on streaming metric tables
 - 2024-10-04: chore: tune producer throughput and kafka batching
+- 2024-10-15: refactor(spark): clarify clean job validation filters
