@@ -20,3 +20,4 @@
 - 2024-09-10: fix(postgres): relax keys on streaming metric tables
 - 2024-10-04: chore: tune producer throughput and kafka batching
 - 2024-10-15: refactor(spark): clarify clean job validation filters
+- 2024-10-18: feat(grafana): expand funnel and latency panels
