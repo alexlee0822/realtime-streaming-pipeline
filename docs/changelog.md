@@ -22,3 +22,4 @@
 - 2024-10-15: refactor(spark): clarify clean job validation filters
 - 2024-10-18: feat(grafana): expand funnel and latency panels
 - 2024-10-31: docs: document topic contracts for interview walkthrough
+- 2024-11-05: chore: pin service versions in compose stack
