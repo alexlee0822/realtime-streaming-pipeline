@@ -23,3 +23,4 @@
 - 2024-10-18: feat(grafana): expand funnel and latency panels
 - 2024-10-31: docs: document topic contracts for interview walkthrough
 - 2024-11-05: chore: pin service versions in compose stack
+- 2024-11-14: fix(spark): coalesce amount and latency defaults
