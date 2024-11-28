@@ -25,3 +25,4 @@
 - 2024-11-05: chore: pin service versions in compose stack
 - 2024-11-14: fix(spark): coalesce amount and latency defaults
 - 2024-11-15: feat(kafka): expose kafka-ui for local debugging
+- 2024-11-28: chore: improve healthchecks for kafka and postgres
