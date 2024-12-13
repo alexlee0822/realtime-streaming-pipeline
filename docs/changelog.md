@@ -26,3 +26,4 @@
 - 2024-11-14: fix(spark): coalesce amount and latency defaults
 - 2024-11-15: feat(kafka): expose kafka-ui for local debugging
 - 2024-11-28: chore: improve healthchecks for kafka and postgres
+- 2024-12-13: refactor(curate): split foreachBatch writers by sink
