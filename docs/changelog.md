@@ -29,3 +29,4 @@
 - 2024-12-13: refactor(curate): split foreachBatch writers by sink
 - 2024-12-23: feat(grafana): add conversion and session stats
 - 2025-01-08: docs: refresh quick start commands
+- 2025-01-09: chore: ignore local delta and checkpoint artifacts
