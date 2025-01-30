@@ -31,3 +31,4 @@
 - 2025-01-08: docs: refresh quick start commands
 - 2025-01-09: chore: ignore local delta and checkpoint artifacts
 - 2025-01-13: chore: capture early pipeline milestones
+- 2025-01-30: docs: note kafka ui in ops checklist
