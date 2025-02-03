@@ -33,3 +33,4 @@
 - 2025-01-13: chore: capture early pipeline milestones
 - 2025-01-30: docs: note kafka ui in ops checklist
 - 2025-01-31: chore: record spark clean job rollout
+- 2025-02-03: docs: note delta silver landing zone
