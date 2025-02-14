@@ -36,3 +36,4 @@
 - 2025-02-03: docs: note delta silver landing zone
 - 2025-02-06: chore: record grafana dashboard publish
 - 2025-02-12: docs: add postgres curated schema note
+- 2025-02-14: chore: record producer corruption tests
