@@ -38,3 +38,4 @@
 - 2025-02-12: docs: add postgres curated schema note
 - 2025-02-14: chore: record producer corruption tests
 - 2025-02-19: docs: clarify dlq handling expectations
+- 2025-02-21: chore: note worker sizing defaults
