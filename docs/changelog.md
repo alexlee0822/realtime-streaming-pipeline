@@ -40,3 +40,4 @@
 - 2025-02-19: docs: clarify dlq handling expectations
 - 2025-02-21: chore: note worker sizing defaults
 - 2025-02-26: docs: add local port map reminder
+- 2025-03-19: chore: record funnel metrics sink wiring
