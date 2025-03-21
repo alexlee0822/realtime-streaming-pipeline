@@ -41,3 +41,4 @@
 - 2025-02-21: chore: note worker sizing defaults
 - 2025-02-26: docs: add local port map reminder
 - 2025-03-19: chore: record funnel metrics sink wiring
+- 2025-03-21: docs: mention interview demo order
