@@ -45,3 +45,4 @@
 - 2025-03-28: chore: note checkpoint volume mounts
 - 2025-04-28: docs: clarify admin credentials location
 - 2025-05-12: chore: record curated topic publishing
+- 2025-05-19: docs: add stop script wipe warning
