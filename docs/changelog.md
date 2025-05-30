@@ -47,3 +47,4 @@
 - 2025-05-12: chore: record curated topic publishing
 - 2025-05-19: docs: add stop script wipe warning
 - 2025-05-26: chore: note lz4 producer compression
+- 2025-05-30: docs: clarify event type vocabulary
