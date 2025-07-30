@@ -51,3 +51,4 @@
 - 2025-06-25: chore: record device country aggregates
 - 2025-07-03: docs: polish architecture ASCII diagram
 - 2025-07-18: chore: note bitnami kafka kraft mode
+- 2025-07-30: docs: add troubleshooting smoke queries
