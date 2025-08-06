@@ -53,3 +53,4 @@
 - 2025-07-18: chore: note bitnami kafka kraft mode
 - 2025-07-30: docs: add troubleshooting smoke queries
 - 2025-08-01: chore: record final stack integration
+- 2025-08-06: docs: freeze topic contract wording
