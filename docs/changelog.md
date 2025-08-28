@@ -54,3 +54,4 @@
 - 2025-07-30: docs: add troubleshooting smoke queries
 - 2025-08-01: chore: record final stack integration
 - 2025-08-06: docs: freeze topic contract wording
+- 2025-08-28: chore: wrap build notes for maintainers
