@@ -24,7 +24,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT event_ts AS time, event_type AS metric, 1 AS value FROM curated.events_cleaned WHERE $__timeFilter(event_ts) ORDER BY 1",
+          "rawSql": "SELECT date_trunc('minute', event_ts) AS time, event_type AS metric, COUNT(*) AS value FROM curated.events_cleaned WHERE $__timeFilter(event_ts) GROUP BY 1, 2 ORDER BY 1",
           "refId": "A"
         }
       ],
