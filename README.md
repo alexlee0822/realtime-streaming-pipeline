@@ -28,7 +28,6 @@ chmod +x scripts/*.sh
 |---|---|
 | Grafana | http://localhost:3000 (`admin` / `admin`) |
 | Kafka UI | http://localhost:8080 |
-| Spark master UI | http://localhost:8081 |
 
 Stop and wipe volumes:
 

@@ -9,10 +9,9 @@ docker compose up -d --build
 
 echo
 echo "Services:"
-echo "  Kafka UI : http://localhost:8080"
 echo "  Grafana  : http://localhost:3000  (admin / admin)"
-echo "  Spark UI : http://localhost:8081"
 echo "  Postgres : localhost:5432  (stream / stream / clickstream)"
+echo "  Kafka UI : docker compose --profile ui up -d   → http://localhost:8080"
 echo
 echo "Kafka topics: clickstream.raw → clickstream.cleaned → clickstream.curated (+ clickstream.dlq)"
 echo

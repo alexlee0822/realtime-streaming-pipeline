@@ -1,6 +1,6 @@
 services:
   kafka:
-    image: bitnami/kafka:3.7
+    image: bitnamilegacy/kafka:3.7
     container_name: rsp-kafka
     ports:
       - "9092:9092"
@@ -27,7 +27,7 @@ services:
       retries: 12
 
   kafka-init:
-    image: bitnami/kafka:3.7
+    image: bitnamilegacy/kafka:3.7
     container_name: rsp-kafka-init
     depends_on:
       kafka:
@@ -44,7 +44,8 @@ services:
     restart: "no"
 
   kafka-ui:
-    image: provectuslabs/kafka-ui:v0.7.2
+    profiles: ["ui"]
+    image: provectuslabs/kafka-ui:latest
     container_name: rsp-kafka-ui
     depends_on:
       kafka:
@@ -56,7 +57,7 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
 
   postgres:
-    image: postgres:16-alpine
+    image: public.ecr.aws/docker/library/postgres:16-alpine
     container_name: rsp-postgres
     ports:
       - "5432:5432"
@@ -73,44 +74,6 @@ services:
       timeout: 5s
       retries: 10
 
-  spark-master:
-    build:
-      context: ./spark
-    container_name: rsp-spark-master
-    environment:
-      SPARK_MODE: master
-      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
-      SPARK_RPC_ENCRYPTION_ENABLED: "no"
-      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
-      SPARK_SSL_ENABLED: "no"
-    ports:
-      - "8081:8080"
-      - "7077:7077"
-    volumes:
-      - ./spark/jobs:/opt/spark-jobs
-      - delta_warehouse:/opt/delta
-      - spark_checkpoints:/opt/checkpoints
-
-  spark-worker:
-    build:
-      context: ./spark
-    container_name: rsp-spark-worker
-    depends_on:
-      - spark-master
-    environment:
-      SPARK_MODE: worker
-      SPARK_MASTER_URL: spark://spark-master:7077
-      SPARK_WORKER_MEMORY: 2G
-      SPARK_WORKER_CORES: 2
-      SPARK_RPC_AUTHENTICATION_ENABLED: "no"
-      SPARK_RPC_ENCRYPTION_ENABLED: "no"
-      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: "no"
-      SPARK_SSL_ENABLED: "no"
-    volumes:
-      - ./spark/jobs:/opt/spark-jobs
-      - delta_warehouse:/opt/delta
-      - spark_checkpoints:/opt/checkpoints
-
   spark-clean:
     build:
       context: ./spark
@@ -118,14 +81,12 @@ services:
     depends_on:
       kafka-init:
         condition: service_completed_successfully
-      spark-master:
-        condition: service_started
     environment:
-      SPARK_MODE: master
       KAFKA_BOOTSTRAP: kafka:9092
       DELTA_PATH: /opt/delta
       CHECKPOINT_PATH: /opt/checkpoints
-    entrypoint: ["/opt/bitnami/spark/bin/spark-submit"]
+    user: root
+    entrypoint: ["/opt/spark/bin/spark-submit"]
     command:
       - --master
       - local[2]
@@ -151,17 +112,15 @@ services:
         condition: service_completed_successfully
       postgres:
         condition: service_healthy
-      spark-master:
-        condition: service_started
     environment:
-      SPARK_MODE: master
       KAFKA_BOOTSTRAP: kafka:9092
       DELTA_PATH: /opt/delta
       CHECKPOINT_PATH: /opt/checkpoints
       POSTGRES_URL: jdbc:postgresql://postgres:5432/clickstream
       POSTGRES_USER: stream
       POSTGRES_PASSWORD: stream
-    entrypoint: ["/opt/bitnami/spark/bin/spark-submit"]
+    user: root
+    entrypoint: ["/opt/spark/bin/spark-submit"]
     command:
       - --master
       - local[2]

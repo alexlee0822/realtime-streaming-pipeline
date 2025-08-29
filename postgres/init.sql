@@ -2,7 +2,7 @@
 CREATE SCHEMA IF NOT EXISTS curated;
 
 CREATE TABLE IF NOT EXISTS curated.events_cleaned (
-    event_id        UUID PRIMARY KEY,
+    event_id        TEXT PRIMARY KEY,
     event_type      TEXT NOT NULL,
     event_ts        TIMESTAMPTZ NOT NULL,
     user_id         TEXT NOT NULL,
