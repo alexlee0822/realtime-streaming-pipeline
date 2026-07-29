@@ -54,10 +54,3 @@ grafana/           provisioned datasource + dashboard
 scripts/           start / stop helpers
 docker-compose.yml full local stack
 ```
-
-## Demo path for interviews
-
-1. Open Kafka UI → watch `clickstream.raw` fill with events
-2. Confirm `clickstream.cleaned` and sparse `clickstream.dlq` traffic
-3. Query Postgres: `SELECT event_type, COUNT(*) FROM curated.events_cleaned GROUP BY 1;`
-4. Open Grafana → **Realtime Clickstream** dashboard (5s refresh)
