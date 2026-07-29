@@ -1,4 +1,5 @@
 # Realtime Clickstream Pipeline
+<img width="1609" height="865" alt="image" src="https://github.com/user-attachments/assets/8c080832-00c8-494d-81a7-89322d5f3918" />
 
 Kafka + Spark Structured Streaming pipeline that takes live clickstream events from **raw → cleaned → curated**, lands curated metrics in **Delta Lake** and **Postgres**, and visualises them in **Grafana**.
 
